@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>MR.KK Chat Box</title>
+
+    <!-- Google Fonts for Stylish Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Lobster&display=swap">
+
+    <style>
+        /* Basic reset for margins */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .friend-list {
+            background-color: #1e88e5;
+            color: white;
+            padding: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .friend-list .friend-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .friend-list button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-family: 'Lobster', cursive;
+        }
+
+        .friend-list button.delete-btn {
+            background-color: #ff5252;
+        }
+
+        .friend-list button:hover {
+            background-color: #1565c0;
+        }
+
+        .chat-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-top: 2px solid #ddd;
+            border-bottom: 2px solid #ddd;
+            font-family: 'Lobster', cursive;
+            font-size: 1.1rem;
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 12px;
+            background-color: #e3f2fd;
+            font-family: 'Roboto', sans-serif;
+            cursor: pointer;
+            position: relative;
+            max-width: 80%;
+        }
+
+        .message.self {
+            background-color: #c8e6c9;
+            text-align: right;
+            margin-left: auto;
+        }
+
+        .message strong {
+            display: block;
+            font-weight: bold;
+        }
+
+        .message .timestamp {
+            position: absolute;
+            right: 10px;
+            bottom: 5px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .input-box {
+            display: flex;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+
+        .input-box input[type="file"] {
+            display: none;
+        }
+
+        .input-box label {
+            padding: 10px;
+            background-color: #42a5f5;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+            font-family: 'Lobster', cursive;
+        }
+
+        .input-box input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+            background-color: #f0f0f0;
+            min-height: 50px;  /* Increased height */
+        }
+
+        .input-box button {
+            padding: 12px 20px;
+            margin-left: 10px;
+            border: none;
+            background-color: #66bb6a;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Lobster', cursive;
+        }
+
+        .admin-tools {
+            display: none;
+            justify-content: center;
+            margin: 10px;
+        }
+
+        .admin-tools button {
+            padding: 15px 10px;  /* Increased padding for better height */
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Lobster', cursive;
+            margin: 5px 0;  /* Space between buttons */
+        }
+
+        .admin-tools button:hover {
+            background-color: #e53935;
+        }
+
+        .admin-tools .access-code-update {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .admin-tools .access-code-update button {
+            padding: 12px 15px;  /* Increased padding for better height */
+            font-size: 1rem;  /* Increased font size for better readability */
+            margin:0;
+        }
+
+        .access-form {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 300px;
+            margin: 50px auto;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .access-form input {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Roboto', sans-serif;
+            font-size: 1rem;
+        }
+
+        .access-form button {
+            padding: 12px;
+            background-color: #ff7043;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Lobster', cursive;
+        }
+
+        .message.selected {
+            border: 2px solid #ff5252;
+        }
+
+        .message-delete-btn {
+            display: none;
+            padding: 10px;
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Lobster', cursive;
+        }
+    </style>
+
+    <script>
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+
+        // Disable zooming with Ctrl/Command and mouse scroll
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '0')) {
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('wheel', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+            }
+        });
+
+        // Request notification permission
+        if (Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // Predefined access codes for friends and admin
+        const accessCodes = {
+            'Keerthi': 'kitty4',
+            'Bindu': 'bonda4',
+            'Jahnavi': 'vada4',
+            'Guru': 'ethustar4',
+            'Frd': 'user4',
+            'MR.KK': '90147m90213k'
+        };
+
+        let currentUser = '';
+        let currentChat = '';
+        let selectedMessageId = null;
+
+        function verifyAccess() {
+            const accessCode = document.getElementById('accessCode').value;
+            for (let user in accessCodes) {
+                if (accessCodes[user] === accessCode) {
+                    currentUser = user;
+                    if (user === 'MR.KK') {
+                        alert('Welcome MR.KK! NICE TO SEE YOU.');
+                        document.getElementById('friendList').style.display = 'flex';
+                        document.querySelector('.admin-tools').style.display = 'flex';
+                        currentChat = 'Keerthi'; 
+                    } else {
+                        alert(`Welcome ${user}!`);
+                    }
+                    document.querySelector('.access-form').style.display = 'none';
+                    document.getElementById('chatBox').style.display = 'block';
+                    document.getElementById('inputBox').style.display = 'flex';
+                    loadMessages();
+                    return;
+                }
+            }
+            alert('Invalid Access Code!');
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value.trim();
+
+            if (messageText !== '') {
+                let chatId = currentUser === 'MR.KK' ? currentChat : currentUser;
+                let messages = JSON.parse(localStorage.getItem(chatId)) || [];
+                let newMessage = {
+                    id: Date.now(),  // Unique ID for each message
+                    user: currentUser,
+                    text: messageText,
+                    timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                };
+                messages.push(newMessage);
+                localStorage.setItem(chatId, JSON.stringify(messages));
+
+                messageInput.value = '';
+                displayMessage(newMessage, chatId);
+                if (Notification.permission === 'granted') {
+                    new Notification('New Message', {
+                        body: `${newMessage.user}: ${messageText}`,
+                        icon: 'icon.png'
+                    });
+                }
+            }
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    let chatId = currentUser === 'MR.KK' ? currentChat : currentUser;
+                    let messages = JSON.parse(localStorage.getItem(chatId)) || [];
+                    let newMessage = {
+                        id: Date.now(),
+                        user: currentUser,
+                        text: `<img src="${e.target.result}" alt="Media File" style="max-width: 100%; border-radius: 10px;">`,
+                        timestamp: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                    };
+                    messages.push(newMessage);
+                    localStorage.setItem(chatId, JSON.stringify(messages));
+
+                    document.getElementById('messageInput').value = ''; // Clear input
+                    displayMessage(newMessage, chatId);
+                    if (Notification.permission === 'granted') {
+                        new Notification('New Media Message', {
+                            body: `${newMessage.user} sent a media file.`,
+                            icon: 'icon.png'
+                        });
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayMessage(message, chatId) {
+            const chatMessages = document.getElementById('chatMessages');
+            let messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.dataset.id = message.id;  // Set ID for deletion
+            if (message.user === currentUser || currentUser === 'MR.KK' || chatId === currentUser) {
+                messageDiv.innerHTML = `
+                    <strong>${message.user}</strong>
+                    ${message.text}
+                    <span class="timestamp">${message.timestamp}</span>
+                `;
+                messageDiv.addEventListener('click', function() {
+                    selectMessage(messageDiv);
+                });
+                chatMessages.appendChild(messageDiv);
+            }
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function selectMessage(messageDiv) {
+            const previouslySelected = document.querySelector('.message.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+            if (selectedMessageId === messageDiv.dataset.id) {
+                selectedMessageId = null;
+                document.querySelector('.message-delete-btn').style.display = 'none';
+                return;
+            }
+            messageDiv.classList.add('selected');
+            selectedMessageId = messageDiv.dataset.id;
+            document.querySelector('.message-delete-btn').style.display = 'block';
+        }
+
+        function deleteMessage() {
+            if (selectedMessageId === null) return;
+
+            let chatId = currentUser === 'MR.KK' ? currentChat : currentUser;
+            let messages = JSON.parse(localStorage.getItem(chatId)) || [];
+            messages = messages.filter(message => message.id != selectedMessageId);
+            localStorage.setItem(chatId, JSON.stringify(messages));
+
+            loadMessages();
+            document.querySelector('.message-delete-btn').style.display = 'none';
+        }
+
+        function loadMessages() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = ''; 
+
+            let chatId = currentUser === 'MR.KK' ? currentChat : currentUser; 
+            const messages = JSON.parse(localStorage.getItem(chatId)) || [];
+            for (let message of messages) {
+                displayMessage(message, chatId);
+            }
+        }
+
+        function switchFriend(friend) {
+            currentChat = friend;
+            loadMessages();
+        }
+
+        function deleteChat(friend) {
+            if (confirm(`Are you sure you want to delete the chat with ${friend}?`)) {
+                localStorage.removeItem(friend);
+                loadMessages();
+            }
+        }
+
+        function clearAllChats() {
+            if (confirm("Are you sure you want to clear all chats?")) {
+                for (let user in accessCodes) {
+                    if (user !== 'MR.KK') {
+                        localStorage.removeItem(user);
+                    }
+                }
+                loadMessages();
+            }
+        }
+
+        function updateAccessCode(friend) {
+            const newCode = prompt(`Enter new access code for ${friend}:`);
+            if (newCode) {
+                accessCodes[friend] = newCode;
+                alert(`Access code for ${friend} has been updated.`);
+            }
+        }
+    </script>
+</head>
+<body>
+
+<div class="container">
+    <div class="access-form">
+        <h2>Enter Your Access Code</h2>
+        <input type="password" id="accessCode" placeholder="Access Code">
+        <button onclick="verifyAccess()">VERIFY</button>
+    </div>
+
+    <div class="friend-list" id="friendList" style="display: none;">
+        <div class="friend-group">
+            <button onclick="switchFriend('Keerthi')">Keerthi</button>
+            <button class="delete-btn" onclick="deleteChat('Keerthi')">Delete</button>
+        </div>
+        <div class="friend-group">
+            <button onclick="switchFriend('Bindu')">Bindu</button>
+            <button class="delete-btn" onclick="deleteChat('Bindu')">Delete</button>
+        </div>
+        <div class="friend-group">
+            <button onclick="switchFriend('Jahnavi')">Jahnavi</button>
+            <button class="delete-btn" onclick="deleteChat('Jahnavi')">Delete</button>
+        </div>
+        <div class="friend-group">
+            <button onclick="switchFriend('Guru')">Guru</button>
+            <button class="delete-btn" onclick="deleteChat('Guru')">Delete</button>
+        </div>
+        <div class="friend-group">
+            <button onclick="switchFriend('frd')">Frd</button>
+            <button class="delete-btn" onclick="deleteChat('frd')">Delete</button>
+        </div>
+    </div>
+
+    <div class="chat-area" id="chatBox" style="display: none;">
+        <div id="chatMessages"></div>
+        <button class="message-delete-btn" onclick="deleteMessage()">Delete Message</button>
+    </div>
+
+    <div class="input-box" id="inputBox" style="display: none;">
+        <input type="file" id="fileInput" accept="image/*,video/*" onchange="handleFileUpload(event)">
+        <label for="fileInput">📎</label>
+        <input type="text" id="messageInput" placeholder="Type your message...">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <div class="admin-tools" style="display: none;">
+        <button onclick="clearAllChats()">Clear All Chats</button>
+        <div class="access-code-update">
+            <button onclick="updateAccessCode('Keerthi')">Update Kitty Code</button>
+            <button onclick="updateAccessCode('Bindu')">Update Vada Code</button>
+            <button onclick="updateAccessCode('Jahnavi')">Update Bonda Code</button>
+            <button onclick="updateAccessCode('Guru')">Update EthuStar Code</button>
+            <button onclick="updateAccessCode('Frd')">Update Frd Code</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
