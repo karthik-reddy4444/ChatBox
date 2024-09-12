@@ -274,7 +274,7 @@
                         document.querySelector('.admin-tools').style.display = 'flex';
                         currentChat = 'Keerthi'; 
                     } else {
-                        alert(`Welcome ${user}!`);
+                        alert(`Welcome ${user}! NICE TO SEE YOU.`);
                     }
                     document.querySelector('.access-form').style.display = 'none';
                     document.getElementById('chatBox').style.display = 'block';
@@ -429,6 +429,22 @@
                 alert(`Access code for ${friend} has been updated.`);
             }
         }
+         // Back button handling
+         window.onpopstate = function(event) {
+            if (document.getElementById('chatBox').style.display === 'block') {
+                // If currently in chat, go back to friend list
+                document.getElementById('chatBox').style.display = 'none';
+                document.getElementById('inputBox').style.display = 'none';
+                document.getElementById('friendList').style.display = 'flex';
+            } else if (document.querySelector('.access-form').style.display === 'none') {
+                // If logged in but not in chat, go back to access form
+                document.querySelector('.access-form').style.display = 'block';
+                document.getElementById('friendList').style.display = 'none';
+                document.getElementById('chatBox').style.display = 'none';
+                document.getElementById('inputBox').style.display = 'none';
+            }
+        };
+
     </script>
 </head>
 <body>
@@ -469,7 +485,7 @@
     </div>
 
     <div class="input-box" id="inputBox" style="display: none;">
-        <input type="file" id="fileInput" accept="image/*,video/*" onchange="handleFileUpload(event)">
+        <input type="file" id="fileInput" accept="image/*,video/*,audio/*" onchange="handleFileUpload(event)">
         <label for="fileInput">📎</label>
         <input type="text" id="messageInput" placeholder="Type your message...">
         <button onclick="sendMessage()">Send</button>
