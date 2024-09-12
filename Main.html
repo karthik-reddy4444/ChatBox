@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat with Friends</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            height: 600px; /* Fixed height */
+        }
+
+        .header {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .access-code {
+            display: flex;
+            padding: 15px;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .access-code input {
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 80%;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .access-code button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .friend-list {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            display: none;
+        }
+
+        .friend-list button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            overflow-y: auto;
+        }
+
+        .message-log {
+            flex: 1;
+            overflow-y: auto;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message {
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            max-width: 70%;
+            word-wrap: break-word;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .message.sent {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .message.received {
+            background-color: #e0e0e0;
+            align-self: flex-start;
+        }
+
+        .emoji-picker {
+            position: absolute;
+            bottom: 60px;
+            left: 15px;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none;
+            flex-wrap: wrap;
+            padding: 10px;
+        }
+
+        .emoji-picker-button {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            position: absolute;
+            bottom: 15px;
+            right: 70px;
+        }
+
+        .emoji {
+            font-size: 24px;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .clear-chat-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: none; /* Hidden by default */
+        }
+
+        .form-group {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background-color: white;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .form-group input {
+            flex: 1;
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group button {
+            width: 50px;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            Friend Chat Application
+        </div>
+
+        <div id="accessCodeSection" class="access-code">
+            <input type="text" id="accessCodeInput" placeholder="Enter Access Code">
+            <button id="accessCodeButton">Unlock Chat</button>
+        </div>
+
+        <div id="friendList" class="friend-list">
+            <button data-friend="friend1">Friend 1</button>
+            <button data-friend="friend2">Friend 2</button>
+        </div>
+
+        <div id="chatArea" class="chat-area">
+            <div id="messageLog" class="message-log"></div>
+
+            <button class="emoji-picker-button" id="emojiPickerButton">😊</button>
+            <div id="emojiPicker" class="emoji-picker">
+                <span class="emoji">😀</span>
+                <span class="emoji">😂</span>
+                <span class="emoji">😍</span>
+            </div>
+
+            <button class="clear-chat-button" id="clearChatButton">Clear Chat</button>
+        </div>
+
+        <div class="form-group" id="messageForm">
+            <input type="text" id="messageInput" placeholder="Type a message">
+            <button id="sendButton">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const accessCodeForUser = 'admin123';  
+        const friends = {
+            friend1: { name: 'Friend 1', accessCode: '1234', messages: [] },
+            friend2: { name: 'Friend 2', accessCode: '5678', messages: [] }
+        };
+
+        const accessCodeInput = document.getElementById('accessCodeInput');
+        const accessCodeButton = document.getElementById('accessCodeButton');
+        const accessCodeSection = document.getElementById('accessCodeSection');
+        const friendList = document.getElementById('friendList');
+        const chatArea = document.getElementById('chatArea');
+        const messageLog = document.getElementById('messageLog');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const emojiPickerButton = document.getElementById('emojiPickerButton');
+        const emojiPicker = document.getElementById('emojiPicker');
+        const clearChatButton = document.getElementById('clearChatButton');
+        let currentFriend = null;
+
+        accessCodeButton.addEventListener('click', () => {
+            const enteredCode = accessCodeInput.value.trim();
+            
+            if (enteredCode === accessCodeForUser) {
+                friendList.style.display = 'block';
+                accessCodeSection.style.display = 'none';
+            } else {
+                for (let friendKey in friends) {
+                    if (friends[friendKey].accessCode === enteredCode) {
+                        currentFriend = friends[friendKey];
+                        loadMessages();
+                        accessCodeSection.style.display = 'none';
+                        chatArea.style.display = 'flex';
+                        clearChatButton.style.display = 'block';
+                        break;
+                    }
+                }
+            }
+        });
+
+        document.querySelectorAll('.friend-list button').forEach(button => {
+            button.addEventListener('click', () => {
+                const friendKey = button.dataset.friend;
+                currentFriend = friends[friendKey];
+                loadMessages();
+                chatArea.style.display = 'flex';
+                clearChatButton.style.display = 'block';
+            });
+        });
+
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            currentFriend.messages.push({ text: message, type: 'sent' });
+            localStorage.setItem(currentFriend.name, JSON.stringify(currentFriend.messages));
+
+            displayMessage(message, 'sent');
+            messageInput.value = '';
+        });
+
+        emojiPickerButton.addEventListener('click', () => {
+            emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'flex' : 'none';
+        });
+
+        document.querySelectorAll('.emoji').forEach(emoji => {
+            emoji.addEventListener('click', () => {
+                messageInput.value += emoji.textContent;
+                emojiPicker.style.display = 'none';
+            });
+        });
+
+        messageLog.addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete-icon')) {
+                const messageElement = event.target.parentElement;
+                messageElement.remove();
+                currentFriend.messages = currentFriend.messages.filter(msg => msg.text !== messageElement.textContent.trim());
+                localStorage.setItem(currentFriend.name, JSON.stringify(currentFriend.messages));
+            }
+        });
+
+        clearChatButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear the chat?')) {
+                messageLog.innerHTML = '';
+                currentFriend.messages = [];
+                localStorage.setItem(currentFriend.name, JSON.stringify(currentFriend.messages));
+            }
+        });
+
+        function loadMessages() {
+            messageLog.innerHTML = '';
+            const storedMessages = JSON.parse(localStorage.getItem(currentFriend.name)) || [];
+            currentFriend.messages = storedMessages;
+
+            currentFriend.messages.forEach(msg => {
+                displayMessage(msg.text, msg.type);
+            });
+        }
+
+        function displayMessage(message, type) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', type);
+            messageElement.textContent = message;
+
+            if (type === 'sent') {
+                const deleteIcon = document.createElement('span');
+                deleteIcon.classList.add('delete-icon');
+                deleteIcon.textContent = '❌';
+                messageElement.appendChild(deleteIcon);
+            }
+
+            messageLog.appendChild(messageElement);
+            messageLog.scrollTop = messageLog.scrollHeight;
+        }
+    </script>
+</body>
+</html>
